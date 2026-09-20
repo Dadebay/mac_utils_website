@@ -1,0 +1,27 @@
+{
+  "hosting": {
+    "public": "dist",
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "redirects": [
+      { "source": "/", "destination": "/en", "type": 302 },
+      { "source": "/destek", "destination": "/en/destek", "type": 301 },
+      { "source": "/gizlilik-politikasi", "destination": "/en/gizlilik-politikasi", "type": 301 }
+    ],
+    "headers": [
+      {
+        "source": "/_astro/**",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      },
+      {
+        "source": "/fonts/**",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      },
+      {
+        "source": "**/*.html",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+      }
+    ]
+  }
+}

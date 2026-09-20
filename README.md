@@ -25,10 +25,10 @@ npm run build    # dist/
 npm run preview
 ```
 
-Yayına alma (depo kökünden):
+Yayına alma:
 
 ```bash
-npm --prefix mac_utils/website run build && firebase deploy --only hosting
+npm run build && firebase deploy --only hosting --project mac-utils
 ```
 
 ## Klasörler
@@ -42,6 +42,9 @@ npm --prefix mac_utils/website run build && firebase deploy --only hosting
 | `src/i18n/ui.ts` | Gezinme/altbilgi metinleri |
 | `src/i18n/meta.ts` | Sayfa başlıkları ve açıklamaları |
 | `scripts/make-og.py` | `public/og.png` üretir |
+
+Yönetim paneli ve arka uç ayrı bir depoda: `mac_utils_admin_panel`. Kendi
+Hosting sitesinde yayınlanıyor, bu depo yalnızca tanıtım sitesini dağıtıyor.
 
 ### İçerik nereden geldi
 
@@ -133,10 +136,3 @@ Ayarlar dosyanın başında: `SHATTER_LINE` (dağılma çizgisi), `LIFE` /
 yayındaki sitede de eksikti (404 veriyorlardı). Dosya yoksa kutuda kırık
 görsel yerine sade bir yer tutucu çiziliyor; PNG'yi klasöre koyup yeniden
 derlediğinde kendiliğinden gerçek görsele dönüyor.
-
-## `out/` klasörü
-
-Firebase'den geri indirilen **eski derlenmiş çıktı**. `_next/static/chunks/`
-altındaki karma adlı yüzlerce dosya bu yüzden duruyor — kaynak kod değil,
-derleyici çıktısı. Karşılaştırma için tutuluyor; yeni site doğrulandıktan
-sonra silinebilir (commit `1a91310` içinde kayıtlı kalıyor).
