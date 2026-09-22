@@ -41,15 +41,49 @@ const LIFE_IN = 420;
 const GATHER_STAGGER = 100;
 
 /**
- * Toplanma kaç piksel önceden başlıyor.
+ * Toplanmanın en fazla kaç piksel önceden başlayabileceği.
  *
  * Geri kaydırırken harf çizginin üstünden aşağı doğru geliyor. Toplanmayı
  * ancak çizgiyi geçtikten sonra başlatmak, harfin çizginin altında bir
- * süre yok görünmesine ve sonra birden belirmesine yol açıyordu. Şimdi
- * taneler harf daha yukarıdayken toplanmaya başlıyor ve harf tam çizgiyi
- * geçerken yerine oturmuş oluyor.
+ * süre yok görünmesine ve sonra birden belirmesine yol açıyordu. Bu yüzden
+ * taneler harf daha yukarıdayken yola çıkıyor.
+ *
+ * Sabit 110 pikselin kendi sorunu vardı: yavaş kaydırırken harf bu bandı
+ * geçmek için saniyeler harcıyor, taneler ise 420 ms'de yerine oturup
+ * ölüyordu. Ekranda görünen şey "parçalar yazının yerine geldi ve
+ * dağıldı, yazı hâlâ yok" oluyordu. Gerçek mesafe artık kaydırma hızından
+ * hesaplanıyor (bkz. `gatherLead`); bu yalnızca tavanı.
  */
 const GATHER_LEAD = 110;
+
+/**
+ * Toplanma en az bu kadar önceden başlıyor. Sıfır olsaydı çok yavaş
+ * kaydırmada taneler harf çizgiyi geçtikten sonra doğar, birleşme
+ * gecikmiş görünürdü.
+ */
+const GATHER_LEAD_MIN = 10;
+
+/** Yaklaşık bir kare (ms) — mesafe/hız hesabı için. */
+const FRAME_MS = 16.7;
+
+/**
+ * Taneler yerine oturduktan sonra harfe devir süresi (ms).
+ *
+ * Tane tam hedefindeyken aniden yok olmuyor; harf görünür olduğu anda
+ * kısa bir sönmeyle çekiliyor. İkisinin üst üste bindiği bu an,
+ * "parçalar yazıya dönüştü" hissini veren şey.
+ */
+const HANDOVER = 160;
+
+/**
+ * Dağılma ve geri gelme çizgileri arasındaki pay (px).
+ *
+ * İkisi tam aynı yerde olunca, trackpad'in bir piksellik ileri-geri
+ * salınımı harfi her karede dağıtıp toplatıyordu: aynı anda hem savrulan
+ * hem toplanan taneler, yani görünür bir karmaşa. Geri gelme birkaç
+ * piksel aşağıda olunca salınım bir daha durumu çeviremiyor.
+ */
+const RESTORE_MARGIN = 6;
 
 /**
  * Tek karede en çok kaç öğe rasterleştirilsin.
@@ -101,6 +135,17 @@ interface Particle {
   born: number;
   life: number;
   color: string;
+  /**
+   * Bu tane hangi harfin toplanması için doğdu.
+   *
+   * Tane yerine oturduğunda harf hâlâ gizliyse orada bekliyor: devir
+   * bitmeden ortada ne tane ne yazı kalması, bildirilen hatanın ta
+   * kendisiydi. Kutu şeritlerinin sahibi yok — onlar `clip-path` ile
+   * zaten açıldığı için beklemeleri gerekmiyor.
+   */
+  owner?: CharSpan;
+  /** Harfe devredilirken sönmeye başladığı an. */
+  releasedAt?: number;
 }
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -178,6 +223,7 @@ function scatter(
   now: number,
   inward = false,
   boost = 1,
+  owner?: CharSpan,
 ) {
   if (width <= 0 || height <= 0) return;
   // Çok hızlı kaydırmada tane üretilmiyor: içerik beklemeden geçsin.
@@ -222,6 +268,7 @@ function scatter(
         size,
         born: now + Math.random() * (inward ? GATHER_STAGGER : 90) * detail,
         life,
+        owner,
         color: colorOf(
           Math.min(255, data[i] * boost),
           Math.min(255, data[i + 1] * boost),
@@ -348,7 +395,7 @@ function restoreChar(c: CharSpan, now: number, crossed: boolean) {
   /* Taneler bir kez yola çıkıyor: `returnAt` dolu olduğu sürece yeniden
      üretilmiyor, yoksa her karede yeni bir avuç doğardı. */
   if (!c.returnAt) {
-    shatterChar(c.el, now, true);
+    shatterChar(c.el, now, true, c);
     c.returnAt = now + (LIFE_IN + GATHER_STAGGER) * detail;
   }
 
@@ -365,7 +412,7 @@ function canRaster(): boolean {
   return true;
 }
 
-function shatterChar(span: HTMLElement, now: number, inward = false) {
+function shatterChar(span: HTMLElement, now: number, inward = false, owner?: CharSpan) {
   if (!canRaster()) return;
 
   const rect = span.getBoundingClientRect();
@@ -401,7 +448,17 @@ function shatterChar(span: HTMLElement, now: number, inward = false) {
   const fontDescent = metrics.fontBoundingBoxDescent || descent;
   const baseline = rect.top + (rect.height - (fontAscent + fontDescent)) / 2 + fontAscent;
 
-  scatter(width, height, rect.left - left, baseline - ascent, Math.max(1, Math.round(fontSize / 24)), now, inward);
+  scatter(
+    width,
+    height,
+    rect.left - left,
+    baseline - ascent,
+    Math.max(1, Math.round(fontSize / 24)),
+    now,
+    inward,
+    1,
+    owner,
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -577,6 +634,8 @@ let pendingScan = true;
 let scrollSpeed = 0;
 /** 1 = tam ayrıntı, 0'a yaklaştıkça seyrek ve kısa ömürlü. */
 let detail = 1;
+/** Toplanmanın kaç piksel önceden başlayacağı — her karede hızdan. */
+let gatherLead = GATHER_LEAD;
 /** Bu karede kalan rasterleştirme hakkı. */
 let rasterBudget = RASTER_BUDGET;
 
@@ -597,13 +656,28 @@ function frame(now: number) {
 
   scrollSpeed = scrollSpeed * 0.6 + Math.abs(scrollDelta) * 0.4;
   detail = scrollSpeed <= CALM_SPEED ? 1 : Math.max(0.3, CALM_SPEED / scrollSpeed);
+
+  /*
+   * Toplanma, harfin çizgiye varmasından tam bir "oturma süresi" önce
+   * başlamalı — ne daha erken ne daha geç. Mesafe bu yüzden hızdan
+   * hesaplanıyor: hız (px/kare) × oturma süresinin kaç kare ettiği.
+   *
+   * Sabit bir mesafe iki uçta da yanlıştı. Hızlı kaydırmada harf bandı
+   * bir karede aşıyor, toplanma hiç görünmüyordu; yavaş kaydırmada ise
+   * taneler yerine oturup ölüyor, harf hâlâ gizli olduğu için ortada
+   * boşluk kalıyordu.
+   */
+  gatherLead = Math.min(
+    GATHER_LEAD,
+    Math.max(GATHER_LEAD_MIN, (scrollSpeed * (LIFE_IN * detail)) / FRAME_MS),
+  );
   rasterBudget = RASTER_BUDGET;
 
   for (const block of textBlocks) {
     const rect = block.el.getBoundingClientRect();
 
     // Tamamen çizginin altında ve öncü bölgenin de dışında: bitti.
-    if (rect.top > SHATTER_LINE + 4) {
+    if (rect.top > SHATTER_LINE + RESTORE_MARGIN) {
       if (block.chars) {
         for (const c of block.chars) restoreChar(c, now, true);
       }
@@ -611,7 +685,7 @@ function frame(now: number) {
     }
 
     // Tamamen çizginin üstünde: hepsini bir kerede patlat.
-    if (rect.bottom < SHATTER_LINE - GATHER_LEAD) {
+    if (rect.bottom < SHATTER_LINE - gatherLead) {
       /* Hızlı kaydırmada bir blok, harfleri hiç sarmalanmadan çizgiyi
          tamamen geçebiliyor; o hâlde önce sarmalanıyor, yoksa metin
          nav'ın üstünde öylece duruyordu. */
@@ -642,9 +716,9 @@ function frame(now: number) {
         c.el.style.animation = "";
         shatterChar(c.el, now);
         c.el.style.visibility = "hidden";
-      } else if (c.gone && r.top > SHATTER_LINE) {
+      } else if (c.gone && r.top > SHATTER_LINE + RESTORE_MARGIN) {
         restoreChar(c, now, true);
-      } else if (c.gone && r.top > SHATTER_LINE - GATHER_LEAD) {
+      } else if (c.gone && r.top > SHATTER_LINE - gatherLead) {
         /* Öncü bölge: harf hâlâ çizginin üstünde ama aşağı doğru
            geliyor. Taneler şimdiden toplanmaya başlıyor ki harf
            çizgiye vardığında bütün hâline gelmiş olsun. */
@@ -703,22 +777,39 @@ function frame(now: number) {
     const p = particles[i];
     const age = now - p.born;
 
-    if (age > p.life) {
+    /*
+     * Kaydırma telafisi her tane için, DOĞMADAN ÖNCE de geçerli.
+     *
+     * Taneler 100 ms'ye yayılarak doğuyor. Telafi eskiden `age < 0`
+     * kontrolünden sonra geliyordu, yani doğumunu bekleyen tane sayfayla
+     * birlikte kaymıyordu: geç doğanların hedefi, bekledikleri süre
+     * boyunca kayan sayfa kadar şaşıyordu. Ölçüldü — aynı harfin ilk ve
+     * son taneleri arasında 82 piksel fark vardı. Bulut bu yüzden harfin
+     * biçimini almıyor, yazının yerine dağılmış duruyordu.
+     */
+    if (p.inward) {
+      p.sy -= scrollDelta;
+      p.ty -= scrollDelta;
+    } else {
+      p.y -= scrollDelta;
+    }
+
+    if (age < 0) continue;
+    // Savrulan taneler ömürleri dolunca gidiyor; toplananların ne zaman
+    // gideceğine aşağıda, harfin görünür olup olmadığına bakarak karar
+    // veriliyor.
+    if (!p.inward && age > p.life) {
       particles.splice(i, 1);
       continue;
     }
-    if (age < 0) continue;
 
     /* Sayfa kaydıkça taneler de kayıyor: içerikten koparak havada asılı
        kalmıyorlar, kaydırmaya tutunup öyle gidip geliyorlar. */
     let fade: number;
 
     if (p.inward) {
-      p.sy -= scrollDelta;
-      p.ty -= scrollDelta;
-
       // Sona doğru yavaşlayarak yerine oturuyor.
-      const t = age / p.life;
+      const t = Math.min(1, age / p.life);
       const ease = 1 - (1 - t) * (1 - t) * (1 - t);
       p.x = p.sx + (p.tx - p.sx) * ease;
       p.y = p.sy + (p.ty - p.sy) * ease;
@@ -727,8 +818,31 @@ function frame(now: number) {
          oluyor. Önceden inişte sönüyordu ve toplanma bir bulanıklık
          gibi okunuyordu. */
       fade = Math.min(1, t * 3);
+
+      if (t >= 1) {
+        /*
+         * Tane hedefinde. Harf hâlâ gizliyse burada bekliyor.
+         *
+         * Eskiden tane ömrü dolduğu an siliniyordu; harf ise ancak
+         * çizgiyi geçince görünüyordu. Aradaki süre boyunca ekranda ne
+         * tane ne yazı vardı — parçalar yazının yerine gelip dağılıyor,
+         * sonra yazı birden beliriyordu. Beklemek bu boşluğu kapatıyor.
+         */
+        if (p.owner && p.owner.gone) {
+          p.x = p.tx;
+          p.y = p.ty;
+        } else {
+          /* Harf göründü: tane kısa bir sönmeyle çekiliyor, ikisi bir an
+             üst üste biniyor. */
+          if (!p.releasedAt) p.releasedAt = now;
+          fade = 1 - (now - p.releasedAt) / HANDOVER;
+          if (fade <= 0) {
+            particles.splice(i, 1);
+            continue;
+          }
+        }
+      }
     } else {
-      p.y -= scrollDelta;
       p.x += p.vx * 16;
       p.y += p.vy * 16;
       p.vy -= 0.0009;
