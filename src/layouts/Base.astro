@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import DotField from "../components/DotField.astro";
 import { locales, htmlLang, type Locale } from "../i18n/ui";
 
 interface Props {
@@ -78,7 +79,9 @@ const structuredData = {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
-    <meta name="theme-color" content="#0a0b0f" />
+    {/* Tarayıcı çubuğunun rengi temayla birlikte değişiyor; değeri
+        tema betiği yazıyor (bkz. aşağıdaki satır içi betik). */}
+    <meta name="theme-color" content="#0a0b0f" data-theme-color />
     <link rel="icon" href="/favicon.ico" sizes="any" />
 
     {/* Başlıkta kullanılan iki ağırlık önden yükleniyor: yazı tipi geç
@@ -94,10 +97,37 @@ const structuredData = {
         görünüp sonra kaybolmasın. */}
     <script is:inline>
       document.documentElement.classList.add("js");
+
+      /*
+       * Tema ilk boyamadan ÖNCE yazılıyor. Sayfa açılınca bir kare koyu
+       * görünüp sonra beyaza dönmesi ("flash") başka türlü kaçınılmaz:
+       * stil dosyası temayı `<html data-theme>` üzerinden okuyor.
+       *
+       * Sıra: kullanıcının kendi seçimi → işletim sistemi tercihi →
+       * koyu. Gizli sekmede localStorage erişimi hata atabildiği için
+       * tamamı try içinde.
+       */
+      (() => {
+        let theme = "dark";
+        try {
+          const stored = localStorage.getItem("glassdo-theme");
+          theme =
+            stored === "light" || stored === "dark"
+              ? stored
+              : matchMedia("(prefers-color-scheme: light)").matches
+                ? "light"
+                : "dark";
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        const meta = document.querySelector("[data-theme-color]");
+        if (meta) meta.setAttribute("content", theme === "light" ? "#ffffff" : "#0a0b0f");
+      })();
     </script>
   </head>
 
   <body class="flex min-h-dvh flex-col bg-background font-sans text-foreground antialiased">
+    <DotField />
+
     <slot />
 
     {/* Harfleri kum tanelerine ayıran parçacık sistemi. */}

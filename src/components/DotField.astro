@@ -1,0 +1,18 @@
+---
+/**
+ * Sayfanın arkasındaki noktalı ızgara ve imleci takip eden hale.
+ *
+ * Görsel değil iki CSS degradesi: her ölçekte keskin, ağdan hiçbir şey
+ * inmiyor ve tema değişince rengi jetonlardan kendiliğinden geliyor
+ * (bkz. `global.css` → `.dot-field`).
+ */
+---
+
+<div class="dot-field" data-dot-field aria-hidden="true">
+  <div class="dot-field__layer dot-field__base"></div>
+  <div class="dot-field__layer dot-field__lit"></div>
+</div>
+
+<script>
+  import "../scripts/dots";
+</script>

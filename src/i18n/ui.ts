@@ -12,11 +12,11 @@ export const htmlLang: Record<Locale, string> = { en: "en", tr: "tr", ru: "ru" }
 
 export const localeName: Record<Locale, string> = { en: "EN", tr: "TR", ru: "RU" };
 
-/** Dil seçicinin erişilebilirlik etiketi — içerikte karşılığı yok. */
+/** Denetimlerin erişilebilirlik etiketleri — içerikte karşılığı yok. */
 export const ui = {
-  en: { changeLanguage: "Change language" },
-  tr: { changeLanguage: "Dili değiştir" },
-  ru: { changeLanguage: "Сменить язык" },
+  en: { changeLanguage: "Change language", lightTheme: "Switch to light theme", darkTheme: "Switch to dark theme" },
+  tr: { changeLanguage: "Dili değiştir", lightTheme: "Açık temaya geç", darkTheme: "Koyu temaya geç" },
+  ru: { changeLanguage: "Сменить язык", lightTheme: "Светлая тема", darkTheme: "Тёмная тема" },
 } as const satisfies Record<Locale, unknown>;
 
 /** Bölüm çapaları üç dilde de aynı — yayındaki adresler korunuyor. */

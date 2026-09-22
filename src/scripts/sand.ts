@@ -129,8 +129,23 @@ const sctx = scratch.getContext("2d", { willReadFrequently: true })!;
 
 const particles: Particle[] = [];
 
-/** Saydam yüzeyleri üstüne bindirmek için sayfanın zemin rengi. */
-const pageBackground = getComputedStyle(document.body).backgroundColor || "#0a0b0f";
+/**
+ * Saydam yüzeyleri üstüne bindirmek için sayfanın zemin rengi.
+ *
+ * Değer önbellekte: her karede `getComputedStyle` çağırmak düzen
+ * hesabını zorluyor. Tema değişince önbellek düşürülüyor, yoksa açık
+ * temada taneler koyu zemin rengiyle çiziliyordu.
+ */
+let cachedBackground = "";
+addEventListener("glassdo:themechange", () => {
+  cachedBackground = "";
+});
+function pageBackground(): string {
+  if (!cachedBackground) {
+    cachedBackground = getComputedStyle(document.body).backgroundColor || "#0a0b0f";
+  }
+  return cachedBackground;
+}
 
 /** `rgb(r, g, b)` dizgileri tekrar tekrar üretilmesin. */
 const colorCache = new Map<number, string>();
@@ -499,7 +514,7 @@ function shatterStrip(el: HTMLElement, from: number, to: number, now: number, in
     roundedRectPath(sctx, rect.width, rect.height, radius);
     sctx.clip();
 
-    sctx.fillStyle = pageBackground;
+    sctx.fillStyle = pageBackground();
     sctx.fillRect(0, 0, rect.width, rect.height);
 
     if (alphaOf(style.backgroundColor) > 0.03) {

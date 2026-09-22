@@ -35,6 +35,28 @@ const base = path ? `/${lang}` : "";
 
     <div class="flex items-center gap-2">
       {/*
+        Tema düğmesi. İki ikon da işaretlemede duruyor, hangisinin
+        görüneceğine CSS karar veriyor: tek ikonu betikle değiştirmek,
+        betik geç geldiğinde yanlış ikonu gösteriyordu.
+      */}
+      <button
+        type="button"
+        data-theme-toggle
+        class="flex h-8 w-8 items-center justify-center rounded-full border border-glass-border text-foreground-muted transition-colors duration-200 hover:text-foreground active:scale-95"
+        data-label-light={t.lightTheme}
+        data-label-dark={t.darkTheme}
+        aria-label={t.lightTheme}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 [:root[data-theme=light]_&]:hidden" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="hidden h-3.5 w-3.5 [:root[data-theme=light]_&]:block" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+
+      {/*
         Dil seçici `details/summary` ile çalışıyor: görünüş eskisiyle aynı,
         ama tek satır JavaScript yok ve içindeki üç bağlantı gerçek `<a>`
         olduğu için arama motorları diğer dilleri buradan da keşfediyor.
@@ -89,6 +111,10 @@ const base = path ? `/${lang}` : "";
   Menü dışına tıklanınca kapansın. `details` bunu kendi başına yapmıyor;
   sayfadaki tek betik bu ve satır içi olduğu için ayrıca indirilmiyor.
 */}
+<script>
+  import "../scripts/theme";
+</script>
+
 <script is:inline>
   document.addEventListener("click", (event) => {
     for (const menu of document.querySelectorAll("header details[open]")) {

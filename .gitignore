@@ -3,3 +3,9 @@ dist/
 node_modules/
 
 .DS_Store
+
+# Firebase dagitim onbellegi — yerel, depoya girmemeli.
+.firebase/
+
+# Yerel gelistirme araci ayarlari.
+.claude/

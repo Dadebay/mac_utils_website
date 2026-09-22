@@ -1,24 +1,112 @@
 @import "tailwindcss";
 
-/* Tema, kaybolan kaynaktan değil yayındaki derlenmiş CSS'ten geri
-   çıkarıldı — renkler yayındaki siteyle birebir aynı. */
-@theme {
-  --color-background: #0a0b0f;
-  --color-background-elevated: #0d0f14;
-  --color-foreground: #f2f3f7;
-  --color-foreground-muted: #a6acbb;
-  --color-foreground-subtle: #6b7180;
+/*
+ * İki tema, tek jeton kümesi.
+ *
+ * Bileşenler yalnızca `bg-background`, `text-foreground-muted` gibi
+ * adları kullanıyor; tema değiştirmek bu adların *değerini* değiştirmek
+ * demek. Renkler `@theme inline` ile bağlandığı için Tailwind üretilen
+ * sınıfın içine değişkenin kendisini yazıyor — değer çalışma anında
+ * değişebiliyor.
+ *
+ * Tema her zaman `<html data-theme>` üzerinden okunuyor; sayfa
+ * boyanmadan önce çalışan satır içi betik onu koyuyor (bkz. Base.astro).
+ * Betik çalışmazsa aşağıdaki koyu varsayılan yürürlükte kalıyor — site
+ * yıllardır koyu, JavaScript'siz ziyaretçi için değişen bir şey yok.
+ */
+:root {
+  color-scheme: dark;
 
-  --color-glass-fill: #ffffff0d;
-  --color-glass-fill-strong: #ffffff14;
-  --color-glass-border: #ffffff1a;
+  --surface: #0a0b0f;
+  --surface-elevated: #0d0f14;
+  --ink: #f2f3f7;
+  --ink-muted: #a6acbb;
+  --ink-subtle: #6b7180;
 
-  --color-accent-violet: #7c6fff;
-  --color-accent-blue: #5b8def;
-  --color-accent-teal: #3ed9c4;
+  --glass-fill: #ffffff0d;
+  --glass-fill-strong: #ffffff14;
+  --glass-border: #ffffff1a;
+
+  --accent-violet: #7c6fff;
+  --accent-blue: #5b8def;
+  --accent-teal: #3ed9c4;
+
+  --glow-violet: #7c6fff59;
+  --glow-blue: #5b8def4d;
+  --glow-teal: #3ed9c447;
+
+  --panel-shadow: 0 8px 30px #00000040;
+  --panel-shadow-lg: 0 20px 60px #00000059;
+
+  /* Noktalı zemin: sönük taban, imlecin altında parlayan katman. */
+  --dot: #ffffff1a;
+  --dot-lit: #ffffff8c;
+}
+
+/*
+ * Açık tema.
+ *
+ * Vurgu renkleri koyu temadakilerin aynısı değil: #5b8def beyaz üstünde
+ * 3:1'in altına düşüyor, yani bağlantı metni olarak okunmuyor. Üçü de
+ * beyaz zeminde AA eşiğini geçecek kadar koyulaştırıldı — aynı aile,
+ * farklı ton.
+ */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --surface: #ffffff;
+  --surface-elevated: #f7f8fa;
+  --ink: #0b0d12;
+  --ink-muted: #4f5666;
+  --ink-subtle: #6e7585;
+
+  --glass-fill: #0b0d120a;
+  --glass-fill-strong: #0b0d1212;
+  --glass-border: #0b0d1214;
+
+  --accent-violet: #5b4ae0;
+  --accent-blue: #2f62d6;
+  --accent-teal: #0f9486;
+
+  /* Işık lekeleri beyazda çamur yapıyor: aynı renkler, dörtte bir güç. */
+  --glow-violet: #5b4ae024;
+  --glow-blue: #2f62d61c;
+  --glow-teal: #0f948617;
+
+  --panel-shadow: 0 8px 30px #0b0d1214;
+  --panel-shadow-lg: 0 20px 60px #0b0d1220;
+
+  --dot: #0b0d121a;
+  --dot-lit: #0b0d1273;
+}
+
+@theme inline {
+  --color-background: var(--surface);
+  --color-background-elevated: var(--surface-elevated);
+  --color-foreground: var(--ink);
+  --color-foreground-muted: var(--ink-muted);
+  --color-foreground-subtle: var(--ink-subtle);
+
+  --color-glass-fill: var(--glass-fill);
+  --color-glass-fill-strong: var(--glass-fill-strong);
+  --color-glass-border: var(--glass-border);
+
+  --color-accent-violet: var(--accent-violet);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-teal: var(--accent-teal);
 
   --font-sans: Gilroy, ui-sans-serif, system-ui, -apple-system, sans-serif;
   --ease-glass: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Tema değişince renkler bir anda zıplamasın. Yalnızca zemin ve metin:
+   her şeye geçiş vermek kaydırma sırasında hayalet iz bırakıyor. */
+@media (prefers-reduced-motion: no-preference) {
+  body {
+    transition:
+      background-color 0.35s var(--ease-glass),
+      color 0.35s var(--ease-glass);
+  }
 }
 
 /* Yerel barındırılan yazı tipi: üçüncü taraf font servisine istek
@@ -52,31 +140,30 @@
 /* Arka plandaki yumuşak ışık lekeleri. Görsel değil degrade: ölçeklenince
    bulanıklaşmıyor ve ağ üzerinden hiçbir şey indirilmiyor. */
 .glow-violet {
-  background: radial-gradient(closest-side, #7c6fff59, #0000);
+  background: radial-gradient(closest-side, var(--glow-violet), #0000);
 }
 .glow-blue {
-  background: radial-gradient(closest-side, #5b8def4d, #0000);
+  background: radial-gradient(closest-side, var(--glow-blue), #0000);
 }
 .glow-teal {
-  background: radial-gradient(closest-side, #3ed9c447, #0000);
+  background: radial-gradient(closest-side, var(--glow-teal), #0000);
 }
 
 .glass-panel {
   background: var(--color-glass-fill);
   border: 1px solid var(--color-glass-border);
   backdrop-filter: blur(20px);
-  box-shadow: 0 8px 30px #00000040;
+  box-shadow: var(--panel-shadow);
 }
 
 .glass-panel-lg {
   background: var(--color-background-elevated);
   border: 1px solid var(--color-glass-fill-strong);
-  box-shadow: 0 20px 60px #00000059;
+  box-shadow: var(--panel-shadow-lg);
 }
 
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
 }
 
 /* Hareketi azalt: yumuşak kaydırma vestibüler rahatsızlık yaratabiliyor. */
@@ -175,4 +262,86 @@ html {
 /* Hızlı kaydırmada beliriş atlanıyor; içerik beklemeden görünüyor. */
 .reveal-instant [data-reveal] {
   transition: none;
+}
+
+/*
+ * Noktalı zemin.
+ *
+ * İki katman aynı ızgarayı çiziyor: alttaki sönük ve her yerde, üstteki
+ * parlak ama yalnızca imlecin çevresindeki daireden görünüyor. Tek
+ * katmanla (noktaların rengini imlece göre değiştirerek) yapılamazdı —
+ * bir `background-image` içindeki renk konuma göre değişemiyor.
+ *
+ * Katman `fixed`: sayfa kayarken desen yerinde duruyor, yani ızgara
+ * ekranın kendisine ait bir doku gibi davranıyor.
+ *
+ * `z-index: -1`, gövdenin çocuğu olduğu için tam istediğimiz yere
+ * oturuyor: gövdenin zemin renginin üstünde, ama içeriğin tamamının
+ * altında. Sıfır olsaydı, konumlandırılmamış bölümler (bölümlerin çoğu
+ * öyle) noktaların altında kalırdı — metnin üstüne serpilmiş bir ızgara.
+ */
+.dot-field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  /* İmleç konumu. Betik çalışmazsa bu değerlerde kalıyor: parlak
+     katman üst ortada sabit, hoş bir vurgu — bozuk bir şey görünmüyor. */
+  --dot-x: 50%;
+  --dot-y: 22%;
+  --dot-gap: 22px;
+  --dot-halo: 300px;
+}
+
+.dot-field__layer {
+  position: absolute;
+  inset: 0;
+  /* Nokta `currentColor` ile çiziliyor; iki katmanın tek farkı bu. */
+  background-image: radial-gradient(circle at center, currentColor 1px, #0000 1.6px);
+  background-size: var(--dot-gap) var(--dot-gap);
+}
+
+/*
+ * Taban: üstte güçlü, kenarlara ve aşağı doğru sönüyor. Böylece desen
+ * sayfanın dibinde aniden kesilmiyor, footer'ın üstünde kendiliğinden
+ * bitiyor.
+ */
+.dot-field__base {
+  color: var(--dot);
+  -webkit-mask-image: radial-gradient(125% 85% at 50% 0%, #000 35%, #0000 100%);
+  mask-image: radial-gradient(125% 85% at 50% 0%, #000 35%, #0000 100%);
+}
+
+/* İmlecin altındaki hale. Yumuşak kenar için iki durak: ortada tam,
+   yarı yolda yarım, dışarıda hiç. */
+.dot-field__lit {
+  color: var(--dot-lit);
+  opacity: 0;
+  transition: opacity 0.45s var(--ease-glass);
+  -webkit-mask-image: radial-gradient(
+    var(--dot-halo) circle at var(--dot-x) var(--dot-y),
+    #000 0%,
+    #0007 45%,
+    #0000 72%
+  );
+  mask-image: radial-gradient(
+    var(--dot-halo) circle at var(--dot-x) var(--dot-y),
+    #000 0%,
+    #0007 45%,
+    #0000 72%
+  );
+}
+
+/* İmleç sayfaya girince beliriyor — sayfa açılır açılmaz ortada duran
+   bir leke, kullanıcının yapmadığı bir hareket gibi duruyordu. */
+.dot-field.is-live .dot-field__lit {
+  opacity: 1;
+}
+
+/* Dokunmatik ekranda imleç yok: hale hiç açılmıyor, desen duruyor. */
+@media (pointer: coarse) {
+  .dot-field__lit {
+    display: none;
+  }
 }
