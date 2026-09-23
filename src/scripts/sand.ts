@@ -67,6 +67,16 @@ const GATHER_LEAD_MIN = 10;
 const FRAME_MS = 16.7;
 
 /**
+ * Toplanması yarıda kalan tanenin dağılıp yok olma süresi (ms).
+ *
+ * Kullanıcı harf çizgiyi geçmeden durursa taneler hedefinde bekleyemez:
+ * çizginin üstünde her şeyin dağılmış olması gerekiyor, asılı duran bir
+ * kum yazı oraya ait değil. Kısa tutuluyor — bu bir gösteri değil,
+ * yarım kalmış bir hareketin toparlanması.
+ */
+const DISPERSE = 320;
+
+/**
  * Taneler yerine oturduktan sonra harfe devir süresi (ms).
  *
  * Tane tam hedefindeyken aniden yok olmuyor; harf görünür olduğu anda
@@ -111,6 +121,19 @@ const MAX_STRIP = 240;
  */
 const CALM_SPEED = 25;
 const SKIP_SPEED = 120;
+
+/**
+ * Bu hızın üstünde toplanma hiç başlamıyor (kare başına px).
+ *
+ * Dağılma tarafındaki eşikten (`SKIP_SPEED`) çok daha düşük, çünkü iki
+ * hareketin işi farklı. Dağılan tane harften kopup gider; geç kalması
+ * bir şeyi bozmaz. Toplanan tane ise harfin *yerine* gitmek zorunda ve
+ * bunun için 420 ms'e ihtiyacı var. Hızlı kaydırmada harf o çizgiyi bir
+ * karede geçip görünür oluyor, taneler ise hâlâ yoldaydı: ekranda hem
+ * gerçek yazı hem de peşinden gelen kumdan bir kopyası duruyordu. Üst
+ * üste birkaç blok geçince yazının dört beş kopyası birden görünüyordu.
+ */
+const GATHER_SKIP_SPEED = 45;
 
 /**
  * Tane iki yönde de çalışıyor.
@@ -394,7 +417,7 @@ function restoreChar(c: CharSpan, now: number, crossed: boolean) {
 
   /* Taneler bir kez yola çıkıyor: `returnAt` dolu olduğu sürece yeniden
      üretilmiyor, yoksa her karede yeni bir avuç doğardı. */
-  if (!c.returnAt) {
+  if (!c.returnAt && scrollSpeed <= GATHER_SKIP_SPEED) {
     shatterChar(c.el, now, true, c);
     c.returnAt = now + (LIFE_IN + GATHER_STAGGER) * detail;
   }
@@ -636,6 +659,17 @@ let scrollSpeed = 0;
 let detail = 1;
 /** Toplanmanın kaç piksel önceden başlayacağı — her karede hızdan. */
 let gatherLead = GATHER_LEAD;
+/**
+ * Son kaydırma yönü: +1 aşağı, -1 yukarı.
+ *
+ * Toplanma yalnızca geri dönüşe ait bir hareket. Yön bilinmeden, dağılan
+ * harf çizginin hemen üstünde durduğu sürece öncü bölgenin içinde
+ * sayılıyor ve toplanma da tetikleniyordu: harf dağılıyor, parçalar
+ * yerine geri toplanıyor, sonra onlar da dağılıyordu — tek bir dönüşüm
+ * yerine üç ayrı hareket. Ölçüldü: yalnızca aşağı kaydırırken ekranda
+ * 5016 savrulan tanenin yanında 3984 toplanan tane vardı.
+ */
+let scrollDir = 1;
 /** Bu karede kalan rasterleştirme hakkı. */
 let rasterBudget = RASTER_BUDGET;
 
@@ -654,6 +688,7 @@ function frame(now: number) {
   }
   pendingScan = false;
 
+  if (scrollDelta !== 0) scrollDir = scrollDelta > 0 ? 1 : -1;
   scrollSpeed = scrollSpeed * 0.6 + Math.abs(scrollDelta) * 0.4;
   detail = scrollSpeed <= CALM_SPEED ? 1 : Math.max(0.3, CALM_SPEED / scrollSpeed);
 
@@ -718,10 +753,12 @@ function frame(now: number) {
         c.el.style.visibility = "hidden";
       } else if (c.gone && r.top > SHATTER_LINE + RESTORE_MARGIN) {
         restoreChar(c, now, true);
-      } else if (c.gone && r.top > SHATTER_LINE - gatherLead) {
-        /* Öncü bölge: harf hâlâ çizginin üstünde ama aşağı doğru
-           geliyor. Taneler şimdiden toplanmaya başlıyor ki harf
-           çizgiye vardığında bütün hâline gelmiş olsun. */
+      } else if (c.gone && scrollDir < 0 && r.top > SHATTER_LINE - gatherLead) {
+        /* Öncü bölge: harf hâlâ çizginin üstünde ama geri kaydırmayla
+           aşağı doğru geliyor. Taneler şimdiden toplanmaya başlıyor ki
+           harf çizgiye vardığında bütün hâline gelmiş olsun.
+           Yön şartı olmadan bu, aşağı kaydırırken de çalışıyor ve
+           dağılan harfin parçalarını geri çağırıyordu. */
         restoreChar(c, now, false);
       }
     }
@@ -819,27 +856,39 @@ function frame(now: number) {
          gibi okunuyordu. */
       fade = Math.min(1, t * 3);
 
-      if (t >= 1) {
-        /*
-         * Tane hedefinde. Harf hâlâ gizliyse burada bekliyor.
-         *
-         * Eskiden tane ömrü dolduğu an siliniyordu; harf ise ancak
-         * çizgiyi geçince görünüyordu. Aradaki süre boyunca ekranda ne
-         * tane ne yazı vardı — parçalar yazının yerine gelip dağılıyor,
-         * sonra yazı birden beliriyordu. Beklemek bu boşluğu kapatıyor.
-         */
+      /*
+       * Devir anı: harf göründüyse tanenin işi bitmiştir.
+       *
+       * Eskiden tane yolunu sonuna kadar yürüyordu; harf çizgiyi hızlı
+       * geçip görünür olduğunda, kumdan kopyası hâlâ ona doğru
+       * gidiyordu. Artık harf görünür olur olmaz taneler kısa bir
+       * sönmeyle çekiliyor — yolculuklarını sürdürerek, ama görünmez
+       * olarak. Sahibi olmayan taneler (kutu şeritleri) eskisi gibi
+       * yolun sonunda devrediyor.
+       */
+      const handedOver = p.owner ? !p.owner.gone : t >= 1;
+
+      if (handedOver) {
+        if (!p.releasedAt) p.releasedAt = now;
+        const k = (now - p.releasedAt) / HANDOVER;
+        if (k >= 1) {
+          particles.splice(i, 1);
+          continue;
+        }
+        fade *= 1 - k;
+      } else if (t >= 1) {
         if (p.owner && p.owner.gone) {
-          p.x = p.tx;
-          p.y = p.ty;
-        } else {
-          /* Harf göründü: tane kısa bir sönmeyle çekiliyor, ikisi bir an
-             üst üste biniyor. */
-          if (!p.releasedAt) p.releasedAt = now;
-          fade = 1 - (now - p.releasedAt) / HANDOVER;
-          if (fade <= 0) {
-            particles.splice(i, 1);
-            continue;
-          }
+          /*
+           * Tane yerine oturdu ama harf hâlâ gizli — kullanıcı toplanma
+           * ortasında durmuş demek. Tane burada beklemiyor: çizginin
+           * üstü "dağılmış" bölge, orada asılı duran bir kum yazı yanlış
+           * görünüyor. Savrulan bir taneye dönüşüp gidiyor.
+           */
+          p.inward = false;
+          p.vx = (Math.random() - 0.5) * 0.14;
+          p.vy = -0.015 - Math.random() * 0.09;
+          p.born = now;
+          p.life = DISPERSE;
         }
       }
     } else {
