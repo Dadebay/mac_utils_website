@@ -1,4 +1,38 @@
+# Bütün tarayıcılara açık: tanıtım sitesinde gizlenecek bir şey yok.
 User-agent: *
 Allow: /
+
+# Yapay zekâ asistanlarının arama ve alıntı botları.
+#
+# Zaten yukarıdaki "*" kuralına giriyorlar; buraya tek tek yazılmalarının
+# sebebi niyetin görünür olması: bu site, bir asistan "macOS için görev
+# uygulaması" diye sorulduğunda kaynak gösterilsin diye açık tutuluyor.
+# Kapatmak isteyen, ilgili satırın altına "Disallow: /" yazar.
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# Eğitim amaçlı toplayan botlar da açık (GPTBot, ClaudeBot, CCBot,
+# Google-Extended, Applebot-Extended). Bunlar "*" kuralı üzerinden
+# geliyor; içeriğin model eğitiminde kullanılmasını istemiyorsan her biri
+# için ayrı "Disallow: /" satırı gerekiyor.
+
+# Asistanlar için sitenin özeti — ne olduğu, hangi platformda çalıştığı,
+# hangi sayfada ne olduğu tek dosyada.
+# https://mac-utils.web.app/llms.txt
 
 Sitemap: https://mac-utils.web.app/sitemap-index.xml

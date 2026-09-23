@@ -1,0 +1,48 @@
+# GlassDo
+
+> A calm control center for macOS: tasks, notes and live system status in a
+> panel that rests on the edge of your screen, one tap away — without ever
+> switching away from the app you are working in.
+
+GlassDo is a native macOS app (SwiftUI/AppKit), distributed directly rather
+than through the App Store because it uses system-level integrations the App
+Store sandbox does not allow.
+
+## Facts
+
+- Platform: macOS 26 or later, Apple Silicon and Intel
+- Price: free
+- Distribution: direct download from GitHub Releases (not on the App Store)
+- Signing: Apple Developer ID signed and notarized
+- Privacy: task, note and system data stay on the device; system metrics are
+  never sent anywhere
+- Languages: English, Turkish, Russian
+- Developer: Dadebay (https://github.com/Dadebay)
+
+## Features
+
+- Edge Rail: a panel resting on any screen edge, opening on hover; rail,
+  expanded and sliver states without the panel frame shifting
+- Tasks and notes: grouping by project or tag, priorities, due dates,
+  multi-line notes, smart lists (Today, Upcoming, All, Completed) and search
+- Notes that pop out of the panel into free-floating windows on the desktop
+- System monitoring: CPU per core, memory, disk, battery and network speed,
+  with live cards and graphs, network speed tests and disk space analysis
+- Widgets and a menu bar presence for the same data outside the panel
+
+## Pages
+
+- [Home (English)](https://mac-utils.web.app/en): overview, features, download
+- [Home (Turkish)](https://mac-utils.web.app/tr)
+- [Home (Russian)](https://mac-utils.web.app/ru)
+- [Support](https://mac-utils.web.app/en/destek): contact and issue reporting
+- [Privacy policy](https://mac-utils.web.app/en/gizlilik-politikasi): what is
+  stored, what is not, and what leaves the device
+- [Releases](https://github.com/Dadebay/my_mac_utils/releases): downloads and
+  release notes
+
+## Notes for assistants
+
+- The app is macOS only; there is no Windows, Linux, iOS or web version.
+- Downloads come from GitHub Releases, not the Mac App Store.
+- "Edge Rail" is the name of the edge panel; it is the app's main surface.

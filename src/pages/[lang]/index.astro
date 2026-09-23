@@ -8,7 +8,7 @@ import FeatureRow from "../../components/FeatureRow.astro";
 import Download from "../../components/sections/Download.astro";
 import InstallGuide from "../../components/sections/InstallGuide.astro";
 import Faq from "../../components/sections/Faq.astro";
-import { locales, anchors, type Locale } from "../../i18n/ui";
+import { locales, anchors, htmlLang, latestReleaseUrl, type Locale } from "../../i18n/ui";
 import { content } from "../../i18n/content";
 
 export function getStaticPaths() {
@@ -32,9 +32,61 @@ const faqSchema = {
     acceptedAnswer: { "@type": "Answer", text: item.answer },
   })),
 };
+
+const site = Astro.site ?? new URL("https://mac-utils.web.app");
+
+/**
+ * Uygulamanın künyesi. Yalnızca ana sayfada: alt sayfalar uygulamanın
+ * kendisi değil.
+ *
+ * Alanların hepsi sayfada yazanla aynı — puan/yorum sayısı gibi
+ * uydurulabilecek hiçbir şey yok; olmayan bir değerlendirmeyi
+ * işaretlemek hem yanlış hem de Google'ın el koyduğu bir ihlal.
+ */
+const appSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "GlassDo",
+  applicationCategory: "ProductivityApplication",
+  operatingSystem: "macOS 26",
+  softwareRequirements: c.download.description,
+  description: c.meta.description,
+  url: new URL(`/${lang}`, site).href,
+  downloadUrl: latestReleaseUrl,
+  image: new URL("/og.png", site).href,
+  inLanguage: locales.map((l) => l),
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  featureList: [
+    c.edgeRail.title,
+    c.tasksNotes.title,
+    c.systemMonitoring.title,
+    c.widgetsMenuBar.title,
+    c.privacySync.title,
+  ],
+  author: { "@id": `${site.origin}/#author` },
+};
+
+/**
+ * Kurulum adımları. Sayfadaki dört adımın aynısı — arama sonucunda
+ * "nasıl kurulur" sorusuna doğrudan cevap olarak çıkabiliyor, yapay
+ * zekâ araçları da adımları buradan okuyabiliyor.
+ */
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: c.installGuide.title,
+  inLanguage: htmlLang[lang],
+  totalTime: "PT3M",
+  step: c.installGuide.steps.map((step, index) => ({
+    "@type": "HowToStep",
+    position: index + 1,
+    name: step.title,
+    text: step.description,
+  })),
+};
 ---
 
-<Base lang={lang} title={c.meta.title} description={c.meta.description} schema={faqSchema}>
+<Base lang={lang} title={c.meta.title} description={c.meta.description} schema={[appSchema, faqSchema, howToSchema]}>
   <Header lang={lang} />
 
   <main id="main" data-dissolve-root class="flex-1">

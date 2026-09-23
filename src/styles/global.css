@@ -137,6 +137,31 @@
   font-display: swap;
 }
 
+/*
+ * Marka yazısının kendi yazı tipi. Yalnızca "GlassDo" kelimesinde
+ * kullanılıyor — gövde metni Gilroy olarak kalıyor.
+ */
+@font-face {
+  font-family: Qurova;
+  src: url("/fonts/qurova/QurovaDEMO-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-display: swap;
+}
+
+/*
+ * Marka yazısı.
+ *
+ * Harf aralığı biraz sıkılıyor: Qurova'nın kendi boşlukları 14 punto
+ * bir logoda dağınık duruyor. `font-weight` sabitleniyor çünkü dosyada
+ * tek ağırlık var; tarayıcının sahte kalın üretmesi harfleri
+ * bozuyordu.
+ */
+.wordmark {
+  font-family: Qurova, var(--font-sans);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
 /* Arka plandaki yumuşak ışık lekeleri. Görsel değil degrade: ölçeklenince
    bulanıklaşmıyor ve ağ üzerinden hiçbir şey indirilmiyor. */
 .glow-violet {
@@ -164,6 +189,26 @@
 
 html {
   scroll-behavior: smooth;
+
+  /*
+   * Kaydırma çubuğu gizli. Kaydırmanın kendisi olduğu gibi duruyor —
+   * tekerlek, trackpad, klavye, ⌘F hepsi çalışıyor; yalnızca çubuk
+   * çizilmiyor.
+   *
+   * Sayfanın kendi hareketi (kum efekti, noktalı zemin) kenarda duran
+   * gri bir şeritle birlikte dağınık görünüyordu. macOS'ta çubuk zaten
+   * varsayılan olarak kayboluyor; bu satırlar "her zaman göster"
+   * diyenlerde ve Windows'ta da aynı görüntüyü veriyor.
+   */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 /* Hareketi azalt: yumuşak kaydırma vestibüler rahatsızlık yaratabiliyor. */

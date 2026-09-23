@@ -11,8 +11,8 @@ interface Props {
   path?: string;
   /** Arama sonuçlarında istenmeyen sayfalar (ör. yönetim paneli). */
   noindex?: boolean;
-  /** Sayfaya özel ek yapısal veri (ana sayfada SSS işaretlemesi). */
-  schema?: Record<string, unknown>;
+  /** Sayfaya özel ek yapısal veri (ana sayfada uygulama, SSS, kurulum). */
+  schema?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const { lang, title, description, path = "", noindex = false, schema } = Astro.props;
@@ -35,21 +35,49 @@ const alternates = locales.map((l) => ({
 const ogImage = new URL("/og.png", site).href;
 
 /**
- * Yapısal veri: arama motoruna bunun bir uygulama olduğunu, hangi
- * platformda çalıştığını ve ücretsiz olduğunu söylüyor.
+ * Site geneli yapısal veri.
+ *
+ * Burada yalnızca her sayfa için doğru olan şeyler var: sitenin kendisi
+ * ve arkasındaki kişi. Uygulamanın künyesi (`SoftwareApplication`),
+ * SSS ve kurulum adımları yalnızca ana sayfada — eskiden uygulama
+ * künyesi buradaydı ve gizlilik politikası sayfası da kendini bir
+ * uygulama olarak tanıtıyordu.
  */
-const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "GlassDo",
-  applicationCategory: "ProductivityApplication",
-  operatingSystem: "macOS 26",
-  description,
-  url: canonical.href,
-  inLanguage: htmlLang[lang],
-  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-  author: { "@type": "Person", name: "Dadebay", url: "https://github.com/Dadebay" },
-};
+const structuredData: Record<string, unknown>[] = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${site.origin}/#website`,
+    name: "GlassDo",
+    url: site.origin,
+    description,
+    inLanguage: htmlLang[lang],
+    publisher: { "@id": `${site.origin}/#author` },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": `${site.origin}/#author`,
+    name: "Dadebay",
+    url: "https://github.com/Dadebay",
+    sameAs: ["https://github.com/Dadebay", "https://github.com/Dadebay/my_mac_utils"],
+  },
+];
+
+/**
+ * Alt sayfalarda kırıntı yolu: arama sonucunda adresin yerine
+ * "GlassDo › Destek" gibi bir yol görünüyor.
+ */
+if (path) {
+  structuredData.push({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "GlassDo", item: new URL(`/${lang}`, site).href },
+      { "@type": "ListItem", position: 2, name: title, item: canonical.href },
+    ],
+  });
+}
 ---
 
 <!doctype html>
@@ -61,7 +89,18 @@ const structuredData = {
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical.href} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {/*
+      Zengin sonuç izinleri: büyük görsel önizleme ve kısaltılmamış
+      alıntı. Varsayılan davranış kısa alıntı ve küçük görsel; bu satır
+      olmadan hem arama sonucunda hem de sayfayı okuyan yapay zekâ
+      araçlarında içeriğin yalnızca bir kırıntısı görünüyor.
+    */}
+    <meta
+      name="robots"
+      content={noindex
+        ? "noindex, nofollow"
+        : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"}
+    />
 
     {alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
     {/* Dili eşleşmeyen ziyaretçi İngilizce sürüme gitsin. */}
@@ -74,10 +113,16 @@ const structuredData = {
     <meta property="og:url" content={canonical.href} />
     <meta property="og:locale" content={htmlLang[lang]} />
     <meta property="og:image" content={ogImage} />
+    {/* Ölçüler paylaşım kartını daha ilk istekte doğru boyutta çizdiriyor;
+        `alt` ise kartı ekran okuyucuya açıklıyor. */}
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="GlassDo — macOS" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content="GlassDo — macOS" />
 
     {/* Tarayıcı çubuğunun rengi temayla birlikte değişiyor; değeri
         tema betiği yazıyor (bkz. aşağıdaki satır içi betik). */}
@@ -88,6 +133,9 @@ const structuredData = {
         gelirse metin önce sistem fontuyla çizilip sonra kayıyor. */}
     <link rel="preload" href="/fonts/gilroy/Gilroy-Regular.ttf" as="font" type="font/ttf" crossorigin />
     <link rel="preload" href="/fonts/gilroy/Gilroy-SemiBold.ttf" as="font" type="font/ttf" crossorigin />
+    {/* Marka yazısı sayfanın ilk göründüğü yerde: geç gelirse logo önce
+        gövde yazı tipiyle çizilip sonra değişiyor. */}
+    <link rel="preload" href="/fonts/qurova/QurovaDEMO-Medium.otf" as="font" type="font/otf" crossorigin />
 
     <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
     {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
