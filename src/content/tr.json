@@ -73,18 +73,17 @@
     "description": "Masaüstü ve Notification Center widget'larında bugünün görevleri ve sistem özeti. Menü çubuğunda istediğin ölçer, istediğin biçimde: çubuk, yüzde, bayt veya grafik."
   },
   "privacySync": {
-    "title": "Senkronizasyon, senin kontrolünde",
-    "description": "Görevlerin ve notların isteğe bağlı olarak cihazların arasında senkronize edilir. Sistem izleme verilerin (CPU, RAM, disk, ağ) varsayılan olarak buluta hiç gitmez — yalnızca kendi Mac'inde kalır.",
+    "title": "Sorun büyümeden haberin olsun",
+    "description": "GlassDo arka planda sessizce iki şeyi izler: Mac'inin ısınması ve Çöp Kutusu'nun şişmesi. Eşiği sen belirlersin — bildirim yalnızca gerçekten dikkatini çekmeye değdiğinde gelir.",
     "points": [
-      "Görev/not senkronizasyonu isteğe bağlı ve hesabınla sınırlı",
-      "Sistem metrikleri buluta yüklenmez",
-      "Anonim kullanım analitiğine yalnızca izin verirsen katkı sağlarsın"
+      "Isınma uyarısı en çok işlemci kullanan uygulamayı adıyla söyler",
+      "Çöp kutusu uyarısı senin belirlediğin boyut eşiğine göre çalışır",
+      "İkisi de varsayılan olarak kapalı — yalnızca istediğini aç"
     ]
   },
   "download": {
     "title": "Mac için indir",
     "description": "Apple Silicon ve Intel Mac'lerde çalışır. macOS 26 veya üzeri gerektirir.",
-    "releaseNotesLabel": "Sürüm notları",
     "requirementsLabel": "macOS 26+",
     "architectureLabel": "Apple Silicon & Intel",
     "trustBadge": "Uygulama Apple Developer ile imzalanmış ve notarize edilmiştir.",

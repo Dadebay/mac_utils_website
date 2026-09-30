@@ -187,6 +187,23 @@
   box-shadow: var(--panel-shadow-lg);
 }
 
+/* `.glass-panel` üstüne mor bir parıltı ekler: kartın arkasına taşan,
+   kenarlıktan yumuşakça dışarı sızan bir ışık. */
+.glass-panel-glow {
+  box-shadow: var(--panel-shadow), 0 0 70px -8px var(--glow-violet);
+}
+
+/* Ekran görüntüsü kartlarının arkasına taşan mor parıltı — sayfada
+   gezinirken göze çarpsın diye zaten görünür, imleç üstüne gelince
+   biraz daha güçleniyor. */
+.mockup-glow {
+  box-shadow: var(--panel-shadow), 0 0 90px -10px var(--glow-violet);
+  transition: box-shadow 0.3s ease;
+}
+.mockup-glow:hover {
+  box-shadow: var(--panel-shadow), 0 0 120px -6px var(--accent-violet);
+}
+
 html {
   scroll-behavior: smooth;
 

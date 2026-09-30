@@ -25,19 +25,33 @@ const aspect = ratio === "16/9" ? "aspect-[16/9]" : "aspect-[16/10]";
 const hasImage = src ? existsSync(new URL(`../../public${src}`, import.meta.url)) : false;
 ---
 
-<div class:list={["glass-panel relative flex w-full items-center justify-center overflow-hidden rounded-2xl", aspect]}>
+<div class:list={["glass-panel mockup-glow relative flex w-full items-center justify-center overflow-hidden rounded-2xl", aspect]}>
   <div class="glow-violet absolute -left-16 -top-16 h-56 w-56 rounded-full blur-3xl"></div>
   <div class="glow-teal absolute -bottom-16 -right-16 h-56 w-56 rounded-full blur-3xl"></div>
 
   {
     hasImage ? (
-      <img
-        src={src}
-        alt={alt}
-        loading={eager ? "eager" : "lazy"}
-        decoding="async"
-        class="absolute inset-0 h-full w-full object-cover"
-      />
+      <button
+        type="button"
+        class="group absolute inset-0 block h-full w-full cursor-zoom-in"
+        data-lightbox-trigger
+        data-lightbox-src={src}
+        data-lightbox-alt={alt}
+        aria-label={`${alt} — genişlet`}
+      >
+        <img
+          src={src}
+          alt={alt}
+          loading={eager ? "eager" : "lazy"}
+          decoding="async"
+          class="h-full w-full object-cover"
+        />
+        <span class="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover:bg-black/20 group-focus-visible:bg-black/20 group-hover:opacity-100 group-focus-visible:opacity-100">
+          <span class="rounded-full bg-black/60 p-2.5 text-white backdrop-blur-sm">
+            <Icon name="zoom-in" class="h-5 w-5" strokeWidth={1.75} />
+          </span>
+        </span>
+      </button>
     ) : (
       <div class="relative flex flex-col items-center gap-3 px-6 text-center text-foreground-subtle">
         <Icon name={icon ?? "image"} class="h-10 w-10" strokeWidth={1.5} />

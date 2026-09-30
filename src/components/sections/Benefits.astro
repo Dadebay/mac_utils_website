@@ -23,7 +23,7 @@ const icons: IconName[] = ["sparkles", "gauge", "zap"];
       {
         benefits.items.map((item, index) => (
           <Reveal>
-            <div class="glass-panel h-full rounded-2xl p-6">
+            <div class="glass-panel glass-panel-glow h-full rounded-2xl p-6">
               <Icon name={icons[index] ?? "sparkles"} class="h-6 w-6 text-accent-violet" strokeWidth={1.5} />
               <h3 class="mt-4 text-lg font-medium">{item.title}</h3>
               <p class="mt-2 text-sm text-foreground-muted">{item.description}</p>

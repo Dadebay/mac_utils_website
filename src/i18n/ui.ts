@@ -29,7 +29,14 @@ export const anchors = {
 
 /** Dışarıya giden adresler tek yerde. */
 export const repoUrl = "https://github.com/Dadebay/my_mac_utils";
-export const releasesUrl = `${repoUrl}/releases`;
 export const latestReleaseUrl = `${repoUrl}/releases/latest`;
+/**
+ * Sayfaya değil doğrudan dosyaya gider: GitHub bu sabit adresi her zaman
+ * en son release'in aynı isimli dosyasına yönlendiriyor (302), yani tarayıcı
+ * release sayfasına hiç uğramadan indirmeyi başlatıyor. Bunun çalışması için
+ * `release.yml`'nin .pkg'yi her seferinde aynı adla (sürüm numarası olmadan)
+ * yüklemesi gerekiyor.
+ */
+export const latestPkgDownloadUrl = `${repoUrl}/releases/latest/download/GlassDo-macOS.pkg`;
 export const issuesUrl = `${repoUrl}/issues`;
 export const authorUrl = "https://github.com/Dadebay";

@@ -73,18 +73,17 @@
     "description": "Today's tasks and a system summary in your desktop and Notification Center widgets. In the menu bar, whichever meter you want, in whichever format: bar, percentage, bytes, or graph."
   },
   "privacySync": {
-    "title": "Sync, on your terms",
-    "description": "Your tasks and notes can optionally sync across your devices. Your system monitoring data (CPU, RAM, disk, network) never goes to the cloud by default — it stays on your own Mac.",
+    "title": "Get a heads-up before it's a problem",
+    "description": "GlassDo quietly watches two things in the background: your Mac running hot, and your Trash pile getting out of hand. You set the thresholds — the notification only shows up when it's actually worth interrupting you.",
     "points": [
-      "Task/note sync is opt-in and scoped to your account",
-      "System metrics are never uploaded",
-      "Anonymous usage analytics only contribute if you allow it"
+      "Thermal alerts name the app using the most CPU",
+      "Trash alerts respect the size threshold you set",
+      "Both are off by default — turn on only what you want"
     ]
   },
   "download": {
     "title": "Download for Mac",
     "description": "Runs on Apple Silicon and Intel Macs. Requires macOS 26 or later.",
-    "releaseNotesLabel": "Release notes",
     "requirementsLabel": "macOS 26+",
     "architectureLabel": "Apple Silicon & Intel",
     "trustBadge": "The app is signed with an Apple Developer ID and notarized.",

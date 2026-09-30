@@ -1,13 +1,12 @@
 ---
 import Icon from "../Icon.astro";
 import Reveal from "../Reveal.astro";
-import { anchors, releasesUrl, latestReleaseUrl } from "../../i18n/ui";
+import { anchors, latestPkgDownloadUrl } from "../../i18n/ui";
 
 interface Props {
   download: {
     title: string;
     description: string;
-    releaseNotesLabel: string;
     requirementsLabel: string;
     architectureLabel: string;
     trustBadge: string;
@@ -28,27 +27,14 @@ const { download } = Astro.props;
         <h2 class="text-3xl font-semibold tracking-tight">{download.title}</h2>
         <p class="mx-auto mt-3 max-w-lg text-balance text-foreground-muted">{download.description}</p>
 
-        {/*
-          Ana buton ve sürüm notları yan yana: biri dolu, diğeri sade bir
-          bağlantı. Eskiden sürüm notları butonun altında tek başına
-          altı çizili bir satırdı ve ikinci bir eylem gibi durmuyordu.
-        */}
-        <div class="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5">
+        {/* Sayfaya değil doğrudan .pkg dosyasına gider — bkz. latestPkgDownloadUrl. */}
+        <div class="mt-9 flex items-center justify-center">
           <a
-            href={latestReleaseUrl}
+            href={latestPkgDownloadUrl}
             class="group inline-flex items-center gap-2.5 rounded-full bg-foreground px-7 py-3.5 text-sm font-medium text-background transition-opacity duration-200 hover:opacity-90 active:scale-95"
           >
             <Icon name="download" class="h-4 w-4 transition-transform duration-300 group-hover:translate-y-0.5" />
             {download.title}
-          </a>
-
-          <a
-            href={releasesUrl}
-            target="_blank"
-            rel="noreferrer"
-            class="text-sm text-foreground-subtle transition-colors duration-200 hover:text-foreground-muted"
-          >
-            {download.releaseNotesLabel} &rarr;
           </a>
         </div>
 
