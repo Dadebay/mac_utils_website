@@ -31,5 +31,15 @@ export const anchors = {
 export const repoUrl = "https://github.com/Dadebay/my_mac_utils";
 export const releasesUrl = `${repoUrl}/releases`;
 export const latestReleaseUrl = `${repoUrl}/releases/latest`;
+/**
+ * İndirme düğmesinin hedefi: en son sürümün kurulum paketi, doğrudan.
+ *
+ * Düğme eskiden sürüm sayfasına (`latestReleaseUrl`) gidiyordu; ziyaretçi
+ * orada hangi dosyayı indireceğini kendisi seçmek zorunda kalıyordu.
+ * `releases/latest/download/<ad>` GitHub'ın sabit adresi: yeni sürüm
+ * yüklendiğinde site yeniden yayınlanmadan en yenisini veriyor — yeter ki
+ * paket her sürümde aynı adla (`GlassDo.pkg`) yüklensin.
+ */
+export const latestPkgUrl = `${repoUrl}/releases/latest/download/GlassDo.pkg`;
 export const issuesUrl = `${repoUrl}/issues`;
 export const authorUrl = "https://github.com/Dadebay";

@@ -1,7 +1,7 @@
 ---
 import Icon from "../Icon.astro";
 import Reveal from "../Reveal.astro";
-import { anchors, releasesUrl, latestReleaseUrl } from "../../i18n/ui";
+import { anchors, releasesUrl, latestPkgUrl } from "../../i18n/ui";
 
 interface Props {
   download: {
@@ -35,7 +35,7 @@ const { download } = Astro.props;
         */}
         <div class="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5">
           <a
-            href={latestReleaseUrl}
+            href={latestPkgUrl}
             class="group inline-flex items-center gap-2.5 rounded-full bg-foreground px-7 py-3.5 text-sm font-medium text-background transition-opacity duration-200 hover:opacity-90 active:scale-95"
           >
             <Icon name="download" class="h-4 w-4 transition-transform duration-300 group-hover:translate-y-0.5" />
@@ -70,9 +70,15 @@ const { download } = Astro.props;
           okunuyor, kısa olan da altında kalıyor.
         */}
         <div class="mt-9 space-y-3 border-t border-glass-border pt-7 text-left">
+          {/*
+            Paket artık Developer ID ile imzalı ve Apple'ın noter onayından
+            geçmiş; eskiden burada "imzasız geliştirme sürümü, Gatekeeper
+            uyarı verebilir" yazıyordu. O uyarı hem artık doğru değil hem de
+            indirmeden hemen önce güveni sarsan tek cümleydi.
+          */}
           <p class="flex items-start gap-3 text-xs leading-relaxed text-foreground-subtle">
-            <Icon name="triangle-alert" class="mt-px h-4 w-4 shrink-0 text-accent-blue" strokeWidth={1.75} />
-            <span>{download.unsignedNotice}</span>
+            <Icon name="check" class="mt-px h-4 w-4 shrink-0 text-accent-teal" strokeWidth={1.75} />
+            <span>{download.trustBadge}</span>
           </p>
           <p class="flex items-start gap-3 text-xs leading-relaxed text-foreground-subtle">
             <Icon name="check" class="mt-px h-4 w-4 shrink-0 text-accent-teal" strokeWidth={1.75} />
