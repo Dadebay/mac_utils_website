@@ -5,6 +5,7 @@ import Footer from "../../components/Footer.astro";
 import Hero from "../../components/sections/Hero.astro";
 import Benefits from "../../components/sections/Benefits.astro";
 import FeatureRow from "../../components/FeatureRow.astro";
+import WhatsNew from "../../components/sections/WhatsNew.astro";
 import Download from "../../components/sections/Download.astro";
 import InstallGuide from "../../components/sections/InstallGuide.astro";
 import Faq from "../../components/sections/Faq.astro";
@@ -126,6 +127,7 @@ const howToSchema = {
       image="/screenshots/smart-alerts.webp"
     />
 
+    <WhatsNew whatsNew={c.whatsNew} />
     <Download download={c.download} />
     <InstallGuide installGuide={c.installGuide} />
     <Faq faq={c.faq} />

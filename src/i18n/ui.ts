@@ -24,6 +24,7 @@ export const anchors = {
   features: "ozellikler",
   privacy: "gizlilik",
   faq: "sss",
+  whatsNew: "yenilikler",
   download: "indir",
 } as const;
 
@@ -40,3 +41,15 @@ export const latestReleaseUrl = `${repoUrl}/releases/latest`;
 export const latestPkgDownloadUrl = `${repoUrl}/releases/latest/download/GlassDo-macOS.pkg`;
 export const issuesUrl = `${repoUrl}/issues`;
 export const authorUrl = "https://github.com/Dadebay";
+
+/**
+ * İndirme sayacı Firestore'da `counters/downloads` belgesinde tutuluyor.
+ * Proje Spark planında (Cloud Functions çalışmıyor), bu yüzden sayfa
+ * dokümana Firestore REST API ile doğrudan yazıyor — SDK yok, sunucu yok.
+ * Güvenlik kuralları (`mac_utils_admin_panel/firestore.rules`) yazmayı
+ * "yalnızca bire bir artış" ile sınırlıyor, başka hiçbir değeri kabul
+ * etmiyor.
+ */
+const firestoreProjectId = "mac-utils";
+export const downloadCounterDocUrl = `https://firestore.googleapis.com/v1/projects/${firestoreProjectId}/databases/(default)/documents/counters/downloads`;
+export const downloadCounterCommitUrl = `https://firestore.googleapis.com/v1/projects/${firestoreProjectId}/databases/(default)/documents:commit`;

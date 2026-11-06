@@ -81,6 +81,44 @@
       "Both are off by default — turn on only what you want"
     ]
   },
+  "whatsNew": {
+    "subtitle": "Latest update",
+    "title": "What's new in GlassDo",
+    "items": [
+      {
+        "icon": "sparkles",
+        "title": "Keyboard backlight & cleaning timer",
+        "description": "Adjust the keyboard backlight right from the Keyboard Clean panel, and pick how long the lock lasts: 15 seconds to 2 minutes. Press Esc three times to finish early."
+      },
+      {
+        "icon": "check",
+        "title": "Notepad",
+        "description": "A new window with a list of separate notes and a checklist editor. Tick items off, add dividers, and export any note as a text file."
+      },
+      {
+        "icon": "globe",
+        "title": "Combined network widget",
+        "description": "One menu bar item that shows live download and upload speed next to today's data usage."
+      },
+      {
+        "icon": "image",
+        "title": "Image Converter",
+        "description": "Drop in images and convert them to another format, including WebP, with adjustable quality."
+      },
+      {
+        "icon": "gauge",
+        "title": "Simpler settings",
+        "description": "Related settings now share a page: Panel (size and rail icons) and Menu Bar & Network. The side rail also shrinks to fit its icons."
+      }
+    ],
+    "fixesTitle": "Fixes",
+    "fixes": [
+      "Opening the Phone page no longer clips the window.",
+      "The side rail no longer leaves an empty dark area below its icons.",
+      "Page titles no longer overlap content while scrolling.",
+      "The Network Activity panel is tidier in the side panel."
+    ]
+  },
   "download": {
     "title": "Download for Mac",
     "description": "Runs on Apple Silicon and Intel Macs. Requires macOS 26 or later.",
@@ -89,7 +127,8 @@
     "trustBadge": "The app is signed with an Apple Developer ID and notarized.",
     "unsignedNotice": "This build is an unsigned, non-notarized development version: Gatekeeper may show a warning on first launch.",
     "privacyMicrocopy": "The app never sends your system data to the cloud.",
-    "errorMissingUrl": "The download link isn't available right now. Please try again later."
+    "errorMissingUrl": "The download link isn't available right now. Please try again later.",
+    "downloadCountLabel": "Downloaded {count} times so far"
   },
   "installGuide": {
     "title": "Install in four steps",

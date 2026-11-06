@@ -1,0 +1,60 @@
+---
+import Icon from "../Icon.astro";
+import Reveal from "../Reveal.astro";
+import { anchors } from "../../i18n/ui";
+
+interface Props {
+  whatsNew: {
+    title: string;
+    subtitle: string;
+    items: { icon: "sparkles" | "check" | "globe" | "gauge" | "image"; title: string; description: string }[];
+    fixesTitle: string;
+    fixes: string[];
+  };
+}
+const { whatsNew } = Astro.props;
+---
+
+<section id={anchors.whatsNew} class="px-4 py-16">
+  <div class="mx-auto max-w-5xl">
+    <Reveal>
+      <p class="text-center text-xs font-medium uppercase tracking-widest text-accent-blue">{whatsNew.subtitle}</p>
+      <h2 class="mt-2 text-center text-2xl font-semibold tracking-tight sm:text-3xl">{whatsNew.title}</h2>
+    </Reveal>
+
+    <ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        whatsNew.items.map((item) => (
+          <li>
+            <Reveal>
+              <div class="glass-panel h-full rounded-2xl p-5">
+                <Icon name={item.icon} class="h-5 w-5 text-accent-blue" strokeWidth={1.75} />
+                <h3 class="mt-3 font-medium">{item.title}</h3>
+                <p class="mt-1 text-sm text-foreground-muted">{item.description}</p>
+              </div>
+            </Reveal>
+          </li>
+        ))
+      }
+    </ul>
+
+    <Reveal class="mt-4">
+      <div class="glass-panel rounded-2xl p-5">
+        <div class="flex items-center gap-2">
+          <Icon name="bug" class="h-5 w-5 text-accent-blue" strokeWidth={1.75} />
+          <h3 class="font-medium">{whatsNew.fixesTitle}</h3>
+        </div>
+        <ul class="mt-3 grid gap-x-8 gap-y-2 text-sm text-foreground-muted sm:grid-cols-2">
+          {
+            whatsNew.fixes.map((fix) => (
+              <li class="flex items-start gap-2">
+                <Icon name="check" class="mt-0.5 h-4 w-4 shrink-0 text-accent-blue" strokeWidth={2} />
+                <span>{fix}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </Reveal>
+  </div>
+</section>

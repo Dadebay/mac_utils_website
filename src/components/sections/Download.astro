@@ -1,7 +1,7 @@
 ---
 import Icon from "../Icon.astro";
 import Reveal from "../Reveal.astro";
-import { anchors, latestPkgDownloadUrl } from "../../i18n/ui";
+import { anchors, downloadCounterCommitUrl, downloadCounterDocUrl, latestPkgDownloadUrl } from "../../i18n/ui";
 
 interface Props {
   download: {
@@ -12,6 +12,7 @@ interface Props {
     trustBadge: string;
     unsignedNotice: string;
     privacyMicrocopy: string;
+    downloadCountLabel: string;
   };
 }
 const { download } = Astro.props;
@@ -28,14 +29,20 @@ const { download } = Astro.props;
         <p class="mx-auto mt-3 max-w-lg text-balance text-foreground-muted">{download.description}</p>
 
         {/* Sayfaya değil doğrudan .pkg dosyasına gider — bkz. latestPkgDownloadUrl. */}
-        <div class="mt-9 flex items-center justify-center">
+        <div class="mt-9 flex flex-col items-center justify-center gap-3">
           <a
+            id="download-cta"
             href={latestPkgDownloadUrl}
             class="group inline-flex items-center gap-2.5 rounded-full bg-foreground px-7 py-3.5 text-sm font-medium text-background transition-opacity duration-200 hover:opacity-90 active:scale-95"
           >
             <Icon name="download" class="h-4 w-4 transition-transform duration-300 group-hover:translate-y-0.5" />
             {download.title}
           </a>
+
+          {/* Sunucu, tıklamayı yalnızca bu istekle görüyor — dosyanın
+              kendisi doğrudan GitHub'dan indiriliyor. Sayı gelene kadar
+              boş kalıyor, "0"ın parlayıp gitmesi yerine. */}
+          <p id="download-count" class="min-h-[1em] text-xs text-foreground-subtle" aria-live="polite"></p>
         </div>
 
         {/* Gereksinimler rozet olarak: göz tek satır metin yerine iki
@@ -69,3 +76,44 @@ const { download } = Astro.props;
     </div>
   </Reveal>
 </section>
+
+<script define:vars={{ docUrl: downloadCounterDocUrl, commitUrl: downloadCounterCommitUrl, countLabel: download.downloadCountLabel }}>
+  // `.pkg` doğrudan GitHub'dan indiriliyor, aradan geçen bir sunucu yok —
+  // tıklamayı yalnızca bu istek görüyor. Proje Spark planında olduğu için
+  // (Cloud Functions çalışmıyor) doğrudan Firestore REST API'ye yazıyoruz;
+  // güvenlik kuralları yazmayı "bire bir artış"la sınırlıyor (bkz.
+  // mac_utils_admin_panel/firestore.rules). Sayaç isteği `keepalive` ile
+  // gönderiliyor çünkü tıklama anında sayfa indirmeye yönlenmeye
+  // başlıyor; keepalive olmadan tarayıcı isteği sayfa ayrılırken iptal
+  // edebilir.
+  const docName = docUrl.replace("https://firestore.googleapis.com/v1/", "");
+  const countEl = document.getElementById("download-count");
+  const cta = document.getElementById("download-cta");
+
+  function renderCount(count) {
+    if (!countEl || typeof count !== "number" || Number.isNaN(count)) return;
+    countEl.textContent = countLabel.replace("{count}", count.toLocaleString());
+  }
+
+  fetch(docUrl)
+    .then((res) => (res.ok ? res.json() : null))
+    .then((doc) => renderCount(Number(doc?.fields?.count?.integerValue)))
+    .catch(() => {});
+
+  cta?.addEventListener("click", () => {
+    fetch(commitUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        writes: [
+          {
+            update: { name: docName, fields: {} },
+            updateMask: { fieldPaths: [] },
+            updateTransforms: [{ fieldPath: "count", increment: { integerValue: "1" } }],
+          },
+        ],
+      }),
+    }).catch(() => {});
+  });
+</script>

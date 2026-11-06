@@ -81,6 +81,44 @@
       "İkisi de varsayılan olarak kapalı — yalnızca istediğini aç"
     ]
   },
+  "whatsNew": {
+    "subtitle": "Son güncelleme",
+    "title": "GlassDo'da yenilikler",
+    "items": [
+      {
+        "icon": "sparkles",
+        "title": "Klavye ışığı ve temizlik süresi",
+        "description": "Klavye ışığını doğrudan Klavye Temizle panelinden ayarla, kilidin ne kadar süreceğini seç: 15 saniyeden 2 dakikaya. Erken bitirmek için Esc'ye üç kez bas."
+      },
+      {
+        "icon": "check",
+        "title": "Notlar",
+        "description": "Ayrı notların listelendiği ve onay kutulu satırlarla yazılan yeni bir pencere. Maddeleri işaretle, ayırıcı çizgi ekle, her notu metin dosyası olarak dışa aktar."
+      },
+      {
+        "icon": "globe",
+        "title": "Birleşik ağ widget'ı",
+        "description": "Anlık indirme ve yükleme hızını bugünkü veri kullanımının yanında gösteren tek bir menü çubuğu öğesi."
+      },
+      {
+        "icon": "image",
+        "title": "Resim Dönüştürücü",
+        "description": "Resimleri bırak, WebP dahil başka bir biçime ayarlanabilir kaliteyle dönüştür."
+      },
+      {
+        "icon": "gauge",
+        "title": "Daha sade ayarlar",
+        "description": "İlgili ayarlar artık tek sayfada: Panel (boyut ve ray ikonları) ile Menü Çubuğu ve Ağ. Kenar rayı da ikonlarına göre küçülüyor."
+      }
+    ],
+    "fixesTitle": "Düzeltmeler",
+    "fixes": [
+      "Telefon sayfasını açmak artık pencereyi kırpmıyor.",
+      "Kenar rayı, ikonlarının altında boş koyu alan bırakmıyor.",
+      "Sayfa başlıkları kaydırırken içeriğin üstüne binmiyor.",
+      "Ağ Etkinliği paneli kenar panelinde daha derli toplu."
+    ]
+  },
   "download": {
     "title": "Mac için indir",
     "description": "Apple Silicon ve Intel Mac'lerde çalışır. macOS 26 veya üzeri gerektirir.",
@@ -89,7 +127,8 @@
     "trustBadge": "Uygulama Apple Developer ile imzalanmış ve notarize edilmiştir.",
     "unsignedNotice": "Bu derleme henüz imzalanmamış/notarize edilmemiş bir geliştirme sürümüdür: ilk açılışta Gatekeeper uyarı verebilir.",
     "privacyMicrocopy": "Uygulama sistem verilerini buluta göndermez.",
-    "errorMissingUrl": "İndirme bağlantısı şu anda mevcut değil. Lütfen daha sonra tekrar dene."
+    "errorMissingUrl": "İndirme bağlantısı şu anda mevcut değil. Lütfen daha sonra tekrar dene.",
+    "downloadCountLabel": "Şimdiye kadar {count} kez indirildi"
   },
   "installGuide": {
     "title": "Kurulum, dört adım",
